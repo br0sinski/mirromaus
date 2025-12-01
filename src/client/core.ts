@@ -3,7 +3,7 @@ import type { CursorClientOptions } from "./types.js";
 
 // Creates a WebSocket connection to the server and handles sending and receiving cursor messages
 export function createCursorConnection(options: CursorClientOptions): void {
-  const { url, userId, pageId, onCursor } = options; // Destructure options
+  const { url, userId, pageId, onCursor, onLeave } = options; // Destructure options
   const throttleMs = options.throttleMs ?? 0; 
 
   const ws = new WebSocket(url);
@@ -55,6 +55,10 @@ export function createCursorConnection(options: CursorClientOptions): void {
       if (msg.pageId) {
         resolvedPageId = msg.pageId;
       }
+      return;
+    }
+    if (msg.type === "cursor-leave") {
+      onLeave?.(msg);
       return;
     }
     if (msg.type !== "cursor") return;

@@ -20,8 +20,11 @@ export interface InitAckMessage {
     pageId?: string;
 }
 
-export type ClientMessage = CursorMessage | InitMessage;
-export type ServerMessage = CursorMessage | InitAckMessage;
+export interface CursorLeaveMessage {
+    type: 'cursor-leave';
+    userId: string;
+    pageId?: string;
+}
 
 export interface Client {
     socket: WebSocket;
@@ -32,3 +35,6 @@ export interface Client {
 export interface CursorServerOptions {
     port?: number;
 }
+
+export type ClientMessage = CursorMessage | InitMessage;
+export type ServerMessage = CursorMessage | InitAckMessage | CursorLeaveMessage;

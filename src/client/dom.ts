@@ -1,6 +1,6 @@
 import { createCursorConnection } from "./core.js";
 import type { CursorDomClientOptions } from "./types.js";
-import type { CursorMessage } from "../server/types.js";
+import type { CursorLeaveMessage, CursorMessage } from "../server/types.js";
 
 
 // Here is where the magic happens - we actually render the cursors in the DOM
@@ -55,11 +55,25 @@ export function startDomCursors(options: CursorDomClientOptions): void {
 
   // Handles incoming cursor messages and updates the corresponding cursor element's position
   function handleRemoteCursor(msg: CursorMessage) {
-    const id = msg.userId ?? "Error: no userId (no backend?)";
+    const id = msg.userId;
+    if (!id) {
+      console.warn("[mirromaus] Received cursor update without userId, ignoring", msg);
+      return;
+    }
     const el = getOrCreateCursor(id);
     const translation = `translate(${msg.x}px, ${msg.y}px) translate(-50%, -50%)`;
     el.style.transform = translation;
     console.log(`[mirromaus] cursor from ${id} at (${msg.x}, ${msg.y})`);
+  }
+
+  // Removes cursor element when a client leaves
+  function handleCursorLeave(msg: CursorLeaveMessage) {
+    const id = msg.userId;
+    const el = cursors.get(id);
+    if (!el) return;
+    el.remove();
+    cursors.delete(id);
+    console.log(`[mirromaus] cursor removed for ${id}`);
   }
     // Create the WebSocket connection and set up message handling
   createCursorConnection({
@@ -68,6 +82,7 @@ export function startDomCursors(options: CursorDomClientOptions): void {
     pageId,
     throttleMs,
     onCursor: handleRemoteCursor,
+    onLeave: handleCursorLeave,
   });
 }
 

@@ -1,4 +1,4 @@
-import type { Client, CursorMessage, InitMessage } from "./types.js";
+import type { Client, CursorLeaveMessage, CursorMessage, InitMessage } from "./types.js";
 import { addClient, removeClient, getClients } from "./state.js";
 import { WebSocket } from "ws";
 
@@ -13,6 +13,25 @@ export function handleConnect(client: Client): void {
 export function handleDisconnect(client: Client): void {
     removeClient(client);
     console.log("[mirromaus] Client disconnected. Total clients:", getClients().length);
+
+    if (!client.userId) return;
+
+    const leaveMessage: CursorLeaveMessage = {
+        type: "cursor-leave",
+        userId: client.userId,
+        pageId: client.pageId,
+    };
+
+    const payload = JSON.stringify(leaveMessage);
+    const remainingClients = getClients();
+    for (const other of remainingClients) {
+        if (other === client) continue;
+        if (client.pageId && other.pageId && other.pageId !== client.pageId) continue;
+        const socket = other.socket as WebSocket;
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(payload);
+        }
+    }
 }
 
 // Handler for incoming cursor messages -> broadcasts to all other connected clients
