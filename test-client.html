@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>mirromaus test client</title>
+    <style>
+</style>
+
+  </head>
+  <body>
+    <h1>mirromaus test</h1>
+        <script type="module">
+            import { startDomCursors } from  './dist/client/dom.js';
+            startDomCursors({
+                url: "ws://localhost:1337",
+                pageId: "demo",
+                throttleMs: 650,
+                
+            });
+        </script>
+
+  </body>
+</html>
