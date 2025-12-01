@@ -100,9 +100,9 @@ export function createDefaultCursorElement(userId: string): HTMLDivElement {
     const el = document.createElement("div");
     el.className = "mirromaus-cursor";
     el.dataset.userId = userId;
-  el.style.position = "fixed";
-  el.style.top = "0";
-  el.style.left = "0";
+    el.style.position = "fixed";
+    el.style.top = "0";
+    el.style.left = "0";
     return el;
 }
 

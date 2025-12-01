@@ -12,10 +12,22 @@ Prerequisite: Node.js installed
 npm run build
 ```
 
+Host the 
+```bash
+
+```
+
 2. Start the test server
 ```bash
 node test-server.mjs
 ```
 
-3. Open the demo
-- Open the demo HTML file in your browser =)
+3. Host the project for now on a stupid local HTTP server
+```bash
+python -m http.server 8000 
+```
+
+4. Visit the Test-HTML File:
+```bash
+firefox http://127.0.0.1:8000/test-client.html
+```
