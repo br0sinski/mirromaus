@@ -39,6 +39,9 @@ export function startDomCursors(options: CursorDomClientOptions): void {
     let el = cursors.get(cursorUserId);
     if (!el) {
       el = createCursorElement?.(cursorUserId) ?? createDefaultCursorElement(cursorUserId);
+      if (createCursorElement) {
+        ensureTransformSmoothing(el, smoothMs);
+      }
       container.appendChild(el);
       cursors.set(cursorUserId, el);
     }
@@ -90,4 +93,18 @@ export function createDefaultCursorElement(userId: string): HTMLDivElement {
     el.className = "mirromaus-cursor";
     el.dataset.userId = userId;
     return el;
+}
+
+// Ensure custom cursors still get smooth transform animations, i dont know if this should be disabled if someone wants to do their own animations
+function ensureTransformSmoothing(el: HTMLElement, smoothMs: number): void {
+  const transformTransition = `transform ${smoothMs}ms linear`;
+  const current = el.style.transition.trim();
+  if (!current) {
+    el.style.transition = transformTransition;
+  } else if (!current.includes("transform")) {
+    el.style.transition = `${current}, ${transformTransition}`;
+  }
+  if (!el.style.willChange) {
+    el.style.willChange = "transform";
+  }
 }
