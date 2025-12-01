@@ -27,6 +27,8 @@ export function startDomCursors(options: CursorDomClientOptions): void {
     trackingElement,
   } = options;
 
+  const effectivePageId = pageId ?? (typeof window !== "undefined" ? window.location.pathname : undefined);
+
   if(!createCursorElement) {
     console.warn("[mirromaus] No createCursorElement provided, using default cursor element creation.");
     injectDefaultCursorStyles(smoothMs);
@@ -94,7 +96,7 @@ export function startDomCursors(options: CursorDomClientOptions): void {
   createCursorConnection({
     url,
     userId,
-    pageId,
+    pageId: effectivePageId,
     throttleMs,
     trackingElement,
     onCursor: handleRemoteCursor,

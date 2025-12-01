@@ -3,14 +3,14 @@ import type { CursorClientOptions } from "./types.js";
 
 // Creates a WebSocket connection to the server and handles sending and receiving cursor messages
 export function createCursorConnection(options: CursorClientOptions): void {
-  const { url, userId, pageId, trackingElement, onCursor, onLeave} = options; // Destructure options
+  const { url, userId, pageId, trackingElement, onCursor, onLeave } = options; // Destructure options
   const throttleMs = options.throttleMs ?? 0; 
 
   const ws = new WebSocket(url);
 
   let resolvedUserId = userId;
   let resolvedPageId = pageId;
-  let lastSent = 0;
+  let lastSent = 0; 
 
   // Determine the active tracking element - either the provided one or null for viewport tracking
   const activeTrackingElement = trackingElement ?? null;
@@ -21,6 +21,14 @@ export function createCursorConnection(options: CursorClientOptions): void {
     addEventListener: typeof window.addEventListener;
     removeEventListener: typeof window.removeEventListener;
   } = (activeTrackingElement ?? window) as typeof window;
+
+  console.log("Just for Debug Purposes:")
+  console.log("url: ", url);
+  console.log("pageId: ", pageId);
+  console.log("throttleMs: ", throttleMs);
+  console.log("trackingElement: ", trackingElement);
+  console.log("activeTrackingElement: ", activeTrackingElement);
+  console.log("coordinateSpace: ", coordinateSpace);
 
   /* Handle mouse move events and send cursor position messages depending on:
     * - Throttling settings
