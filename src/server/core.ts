@@ -1,4 +1,4 @@
-import type { Client, CursorMessage } from "./types.js";
+import type { Client, CursorMessage, InitMessage } from "./types.js";
 import { addClient, removeClient, getClients } from "./state.js";
 import { WebSocket } from "ws";
 
@@ -18,17 +18,29 @@ export function handleDisconnect(client: Client): void {
 // Handler for incoming cursor messages -> broadcasts to all other connected clients
 export function handleCursorMessage(sender: Client, message: CursorMessage): void {
     const currentClients = getClients();
-    for(const client of currentClients) {
+    const resolvedPageId = sender.pageId ?? message.pageId;
+    const payloadMessage: CursorMessage = {
+        ...message,
+        userId: message.userId ?? sender.userId,
+        pageId: resolvedPageId,
+    };
+    const payload = JSON.stringify(payloadMessage);
 
-        if (client.pageId !== sender.pageId) continue; // stupid simpler filter to only broadcast to same page
+    for (const client of currentClients) {
+        if (client === sender) continue;
+        if (resolvedPageId && client.pageId && client.pageId !== resolvedPageId) continue;
 
-        if(client !== sender) {
-            const socket = client.socket as WebSocket;
-            if(socket.readyState === WebSocket.OPEN) {
-                const payload = JSON.stringify(message);
-                socket.send(payload);
-            }
+        const socket = client.socket as WebSocket;
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(payload);
         }
+    }
+}
+
+// Handler for handshake/init messages -> keeps client metadata up to date
+export function handleInitMessage(client: Client, message: InitMessage): void {
+    if (message.pageId) {
+        client.pageId = message.pageId;
     }
 }
 

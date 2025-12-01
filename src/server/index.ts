@@ -21,8 +21,8 @@ More specific:
 */
 
 import { WebSocketServer } from "ws";
-import type  { CursorServerOptions, Client, CursorMessage } from "./types.js";
-import { handleConnect, handleDisconnect, handleCursorMessage } from "./core.js";
+import type  { CursorServerOptions, Client, CursorMessage, ClientMessage, InitAckMessage } from "./types.js";
+import { handleConnect, handleDisconnect, handleCursorMessage, handleInitMessage } from "./core.js";
 
 export function createCursorServer(options: CursorServerOptions = {}) {
     const port = options.port || 1337;
@@ -45,10 +45,37 @@ export function createCursorServer(options: CursorServerOptions = {}) {
                 // ignore invalid JSON
                 return;
             }
-            const msg = parsed as CursorMessage;
-            if (msg.type !== 'cursor') return;
+            const msg = parsed as ClientMessage;
 
-            handleCursorMessage(client, msg);
+            if (msg.type === "init") {
+                handleInitMessage(client, msg);
+                const ack: InitAckMessage = {
+                    type: "init-ack",
+                    userId: client.userId ?? generateUserId(),
+                    pageId: client.pageId,
+                };
+                if (!client.userId) {
+                    client.userId = ack.userId;
+                }
+                ws.send(JSON.stringify(ack));
+                return;
+            }
+
+            if (msg.type !== "cursor") return;
+
+            if (!client.pageId && msg.pageId) {
+                client.pageId = msg.pageId;
+            }
+
+            const outbound: CursorMessage = {
+                type: "cursor",
+                x: msg.x,
+                y: msg.y,
+                userId: client.userId ?? msg.userId,
+                pageId: client.pageId ?? msg.pageId,
+            };
+
+            handleCursorMessage(client, outbound);
         });
 
         ws.on("close", () => {
