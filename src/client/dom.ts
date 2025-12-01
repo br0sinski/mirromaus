@@ -111,6 +111,7 @@ export function injectDefaultCursorStyles(smoothMs: number) {
 
   const style = document.createElement("style");
   style.id = "mirromaus-cursor-style";
+  // ugly ai generated css cursor =D
   style.textContent = `
     .mirromaus-cursor {
       position: fixed;

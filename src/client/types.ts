@@ -9,7 +9,6 @@ export interface CursorClientOptions {
     onLeave?: (message: CursorLeaveMessage) => void;
     trackingElement?: HTMLElement | null;
 }
-
 export interface CursorDomClientOptions {
   url: string;
   userId?: string;

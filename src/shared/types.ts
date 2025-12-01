@@ -1,5 +1,6 @@
 export type CoordinateSpace = "viewport" | "element";
 
+// Message sent from client to server to represent cursor position
 export interface CursorMessage {
   type: "cursor";
   x: number;
@@ -8,19 +9,17 @@ export interface CursorMessage {
   pageId?: string;
   space?: CoordinateSpace;
 }
-
 export interface InitMessage {
   type: "init";
   userId?: string;
   pageId?: string;
 }
-
 export interface InitAckMessage {
   type: "init-ack";
   userId: string;
   pageId?: string;
 }
-
+// 
 export interface CursorLeaveMessage {
   type: "cursor-leave";
   userId: string;
