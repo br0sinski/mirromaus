@@ -42,6 +42,11 @@ export function startDomCursors(options: CursorDomClientOptions): void {
       if (createCursorElement) {
         ensureTransformSmoothing(el, smoothMs);
       }
+      if (window.getComputedStyle(el).position === "static") {
+        el.style.position = "fixed";
+        el.style.top = "0";
+        el.style.left = "0";
+      }
       container.appendChild(el);
       cursors.set(cursorUserId, el);
     }
@@ -52,7 +57,8 @@ export function startDomCursors(options: CursorDomClientOptions): void {
   function handleRemoteCursor(msg: CursorMessage) {
     const id = msg.userId ?? "Error: no userId (no backend?)";
     const el = getOrCreateCursor(id);
-    el.style.transform = `translate(${msg.x}px, ${msg.y}px)`;
+    const translation = `translate(${msg.x}px, ${msg.y}px) translate(-50%, -50%)`;
+    el.style.transform = translation;
     console.log(`[mirromaus] cursor from ${id} at (${msg.x}, ${msg.y})`);
   }
     // Create the WebSocket connection and set up message handling
@@ -74,7 +80,9 @@ export function injectDefaultCursorStyles(smoothMs: number) {
   style.id = "mirromaus-cursor-style";
   style.textContent = `
     .mirromaus-cursor {
-      position: absolute;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 10px;
       height: 10px;
       border-radius: 9999px;
@@ -92,6 +100,9 @@ export function createDefaultCursorElement(userId: string): HTMLDivElement {
     const el = document.createElement("div");
     el.className = "mirromaus-cursor";
     el.dataset.userId = userId;
+  el.style.position = "fixed";
+  el.style.top = "0";
+  el.style.left = "0";
     return el;
 }
 
