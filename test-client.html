@@ -4,16 +4,31 @@
     <meta charset="utf-8" />
     <title>mirromaus test client</title>
     <style>
+      .game {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: red;
+        width: 700px;
+        height: 500px;
+      }
 </style>
 
   </head>
   <body>
     <h1>mirromaus test</h1>
+
+    <div class="game">
+
+    </div>
+
         <script type="module">
             import { startDomCursors } from  './dist/client/dom.js';
             startDomCursors({
                 url: "ws://localhost:1337",
                 pageId: "demo",
+                trackingElement: document.querySelector('.game'),
             });
         </script>
 

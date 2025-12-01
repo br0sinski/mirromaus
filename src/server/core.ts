@@ -42,6 +42,7 @@ export function handleCursorMessage(sender: Client, message: CursorMessage): voi
         ...message,
         userId: message.userId ?? sender.userId,
         pageId: resolvedPageId,
+        space: message.space,
     };
     const payload = JSON.stringify(payloadMessage);
 

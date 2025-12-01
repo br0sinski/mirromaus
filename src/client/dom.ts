@@ -1,6 +1,6 @@
 import { createCursorConnection } from "./core.js";
 import type { CursorDomClientOptions } from "./types.js";
-import type { CursorLeaveMessage, CursorMessage } from "../server/types.js";
+import type { CursorLeaveMessage, CursorMessage } from "../shared/types.js";
 
 
 // Here is where the magic happens - we actually render the cursors in the DOM
@@ -24,6 +24,7 @@ export function startDomCursors(options: CursorDomClientOptions): void {
     container = document.body,
     smoothMs = 120,
     createCursorElement,
+    trackingElement,
   } = options;
 
   if(!createCursorElement) {
@@ -33,6 +34,7 @@ export function startDomCursors(options: CursorDomClientOptions): void {
 
   // For now fine, in future should be replaced by a database or backend or whatever
   const cursors = new Map<string, HTMLDivElement>();
+  let warnedMissingTrackingElement = false;
 
   // Adds a mapped cursor element for a given user ID
   function getOrCreateCursor(cursorUserId: string): HTMLDivElement {
@@ -61,7 +63,20 @@ export function startDomCursors(options: CursorDomClientOptions): void {
       return;
     }
     const el = getOrCreateCursor(id);
-    const translation = `translate(${msg.x}px, ${msg.y}px) translate(-50%, -50%)`;
+    let x = msg.x;
+    let y = msg.y;
+    const space = msg.space ?? "viewport";
+    if (space === "element") {
+      if (!trackingElement && !warnedMissingTrackingElement) {
+        console.warn("[mirromaus] Received element-relative cursor without a trackingElement configured; falling back to container positioning.");
+        warnedMissingTrackingElement = true;
+      }
+      const reference = trackingElement ?? container;
+      const rect = reference.getBoundingClientRect();
+      x = rect.left + msg.x;
+      y = rect.top + msg.y;
+    }
+    const translation = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
     el.style.transform = translation;
     console.log(`[mirromaus] cursor from ${id} at (${msg.x}, ${msg.y})`);
   }
@@ -81,6 +96,7 @@ export function startDomCursors(options: CursorDomClientOptions): void {
     userId,
     pageId,
     throttleMs,
+    trackingElement,
     onCursor: handleRemoteCursor,
     onLeave: handleCursorLeave,
   });

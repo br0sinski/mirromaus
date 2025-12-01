@@ -73,6 +73,7 @@ export function createCursorServer(options: CursorServerOptions = {}) {
                 y: msg.y,
                 userId: client.userId ?? msg.userId,
                 pageId: client.pageId ?? msg.pageId,
+                space: msg.space,
             };
 
             handleCursorMessage(client, outbound);

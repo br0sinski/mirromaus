@@ -1,9 +1,9 @@
-import type { CursorMessage, InitMessage, ServerMessage } from "../server/types.js";
+import type { CoordinateSpace, CursorMessage, InitMessage, ServerMessage } from "../shared/types.js";
 import type { CursorClientOptions } from "./types.js";
 
 // Creates a WebSocket connection to the server and handles sending and receiving cursor messages
 export function createCursorConnection(options: CursorClientOptions): void {
-  const { url, userId, pageId, onCursor, onLeave } = options; // Destructure options
+  const { url, userId, pageId, onCursor, onLeave, trackingElement } = options; // Destructure options
   const throttleMs = options.throttleMs ?? 0; 
 
   const ws = new WebSocket(url);
@@ -11,6 +11,12 @@ export function createCursorConnection(options: CursorClientOptions): void {
   let resolvedUserId = userId;
   let resolvedPageId = pageId;
   let lastSent = 0;
+  const activeTrackingElement = trackingElement ?? null;
+  const coordinateSpace: CoordinateSpace = activeTrackingElement ? "element" : "viewport";
+  const target: EventTarget & {
+    addEventListener: typeof window.addEventListener;
+    removeEventListener: typeof window.removeEventListener;
+  } = (activeTrackingElement ?? window) as typeof window;
 
   const handleMouseMove = (event: MouseEvent) => {
     if (ws.readyState !== WebSocket.OPEN) return;
@@ -19,12 +25,21 @@ export function createCursorConnection(options: CursorClientOptions): void {
     if (now - lastSent < throttleMs) return;
     lastSent = now;
 
+    let x = event.clientX;
+    let y = event.clientY;
+    if (activeTrackingElement) {
+      const rect = activeTrackingElement.getBoundingClientRect();
+      x = event.clientX - rect.left;
+      y = event.clientY - rect.top;
+    }
+
     const message: CursorMessage = {
       type: "cursor",
-      x: event.clientX,
-      y: event.clientY,
+      x,
+      y,
       userId: resolvedUserId,
       pageId: resolvedPageId,
+      space: coordinateSpace,
     };
 
     ws.send(JSON.stringify(message));
@@ -38,7 +53,7 @@ export function createCursorConnection(options: CursorClientOptions): void {
       pageId: resolvedPageId,
     };
     ws.send(JSON.stringify(initMessage));
-    window.addEventListener("mousemove", handleMouseMove);
+    target.addEventListener("mousemove", handleMouseMove);
   };
 
   ws.onmessage = (event) => {
@@ -67,7 +82,7 @@ export function createCursorConnection(options: CursorClientOptions): void {
   };
 
   const cleanup = () => {
-    window.removeEventListener("mousemove", handleMouseMove);
+    target.removeEventListener("mousemove", handleMouseMove);
   };
 
   ws.onclose = cleanup;

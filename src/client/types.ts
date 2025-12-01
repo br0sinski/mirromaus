@@ -1,5 +1,4 @@
-import type { CursorMessage } from "../server/types.js";
-import type { CursorLeaveMessage } from "../server/types.js";
+import type { CursorLeaveMessage, CursorMessage } from "../shared/types.js";
 
 export interface CursorClientOptions {
     url: string;
@@ -8,6 +7,7 @@ export interface CursorClientOptions {
     throttleMs?: number;
     onCursor?: (message: CursorMessage) => void;
     onLeave?: (message: CursorLeaveMessage) => void;
+    trackingElement?: HTMLElement | null;
 }
 
 export interface CursorDomClientOptions {
@@ -18,4 +18,5 @@ export interface CursorDomClientOptions {
   container?: HTMLElement;  
   smoothMs?: number;      
   createCursorElement?: (userId: string) => HTMLDivElement; 
+  trackingElement?: HTMLElement | null;
 }
