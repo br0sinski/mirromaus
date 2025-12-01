@@ -23,25 +23,25 @@ export function startDomCursors(options: CursorDomClientOptions): void {
     throttleMs,
     container = document.body,
     smoothMs = 120,
+    createCursorElement,
   } = options;
+
+  if(!createCursorElement) {
+    console.warn("[mirromaus] No createCursorElement provided, using default cursor element creation.");
+    injectDefaultCursorStyles(smoothMs);
+  }
 
   // For now fine, in future should be replaced by a database or backend or whatever
   const cursors = new Map<string, HTMLDivElement>();
 
-  // Inject default styles for cursor elements
-  injectDefaultCursorStyles(smoothMs);
-
   // Adds a mapped cursor element for a given user ID
-  function getOrCreateCursor(userId: string): HTMLDivElement {
-    let el = cursors.get(userId);
+  function getOrCreateCursor(cursorUserId: string): HTMLDivElement {
+    let el = cursors.get(cursorUserId);
     if (!el) {
-    // Create a new cursor element for the user if it doesn't exist
-      el = document.createElement("div");
-      el.className = "mirromaus-cursor";
+      el = createCursorElement?.(cursorUserId) ?? createDefaultCursorElement(cursorUserId);
       container.appendChild(el);
-      cursors.set(userId, el);
+      cursors.set(cursorUserId, el);
     }
-
     return el;
   }
 
@@ -64,7 +64,7 @@ export function startDomCursors(options: CursorDomClientOptions): void {
 
 // Injects default CSS styles for cursor elements into the document head - can be customized or replaced
 // maybe I should allow using a custom element for the cursor?
-function injectDefaultCursorStyles(smoothMs: number) {
+export function injectDefaultCursorStyles(smoothMs: number) {
   if (document.getElementById("mirromaus-cursor-style")) return;
 
   const style = document.createElement("style");
@@ -83,4 +83,11 @@ function injectDefaultCursorStyles(smoothMs: number) {
     }
   `;
   document.head.appendChild(style);
+}
+
+export function createDefaultCursorElement(userId: string): HTMLDivElement {
+    const el = document.createElement("div");
+    el.className = "mirromaus-cursor";
+    el.dataset.userId = userId;
+    return el;
 }
