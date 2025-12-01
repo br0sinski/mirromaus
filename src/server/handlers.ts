@@ -1,5 +1,5 @@
-import type { Client, CursorMessage } from "./types";
-import { addClient, removeClient, getClients } from "./state";
+import type { Client, CursorMessage } from "./types.js";
+import { addClient, removeClient, getClients } from "./state.js";
 import { WebSocket } from "ws";
 
 

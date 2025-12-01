@@ -20,3 +20,47 @@ More specific:
 
 */
 
+import { WebSocketServer } from "ws";
+import type  { CursorServerOptions, Client, CursorMessage } from "./types.js";
+import { handleConnect, handleDisconnect, handleCursorMessage } from "./handlers.js";
+
+export function createCursorServer(options: CursorServerOptions = {}) {
+    const port = options.port || 1337;
+    const wss  = new WebSocketServer({ port });
+
+    wss.on("connection", (ws) => {
+        const client: Client = {
+            socket: ws,
+            userId: generateUserId(),
+            pageId: undefined,
+        };
+
+        handleConnect(client);
+
+        ws.on("message", (data) => {
+            let parsed: unknown;
+            try {
+                parsed = JSON.parse(data.toString());
+            } catch {
+                // ignore invalid JSON
+                return;
+            }
+            const msg = parsed as CursorMessage;
+            if (msg.type !== 'cursor') return;
+
+            handleCursorMessage(client, msg);
+        });
+
+        ws.on("close", () => {
+            handleDisconnect(client);
+        });
+    });
+
+    console.log(`[mirromaus] Cursor server started on ws://localhost:${port}`);
+
+    return wss;
+}
+
+function generateUserId(): string {
+    return Math.random().toString(36).substring(2, 10);
+}

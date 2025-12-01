@@ -2,10 +2,15 @@
   "name": "mirromaus",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/server/index.js",
+  "type": "module",
+  "exports": {
+    "./server": "./dist/server/index.js",
+    "./client": "./dist/client/index.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -14,7 +19,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/br0sinski/mirromaus/issues"
   },
@@ -29,3 +33,4 @@
     "ws": "^8.18.3"
   }
 }
+
