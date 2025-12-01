@@ -12,11 +12,6 @@ Prerequisite: Node.js installed
 npm run build
 ```
 
-Host the 
-```bash
-
-```
-
 2. Start the test server
 ```bash
 node test-server.mjs
