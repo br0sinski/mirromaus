@@ -22,7 +22,7 @@ More specific:
 
 import { WebSocketServer } from "ws";
 import type  { CursorServerOptions, Client, CursorMessage } from "./types.js";
-import { handleConnect, handleDisconnect, handleCursorMessage } from "./handlers.js";
+import { handleConnect, handleDisconnect, handleCursorMessage } from "./core.js";
 
 export function createCursorServer(options: CursorServerOptions = {}) {
     const port = options.port || 1337;

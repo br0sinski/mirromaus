@@ -8,4 +8,5 @@
 */
 
 export * from "./types.js";
-export * from "./handlers.js";
+export { createCursorConnection } from "./core.js";
+export { startDomCursors } from "./dom.js";
