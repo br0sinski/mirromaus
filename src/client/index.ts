@@ -9,4 +9,4 @@
 
 export * from "./types.js";
 export { createCursorConnection } from "./core.js";
-export { startDomCursors } from "./dom.js";
+export { startMirromaus } from "./dom.js";

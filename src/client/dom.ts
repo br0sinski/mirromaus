@@ -4,7 +4,7 @@ import type { CursorLeaveMessage, CursorMessage } from "../shared/types.js";
 
 
 // Here is where the magic happens - we actually render the cursors in the DOM
-export function startDomCursors(options: CursorDomClientOptions): void {
+export function startMirromaus(options: CursorDomClientOptions): void {
  /**
   * 
   * Starts rendering remote cursors in the DOM based on received cursor messages
