@@ -1,7 +1,7 @@
 {
   "name": "mirromaus",
   "version": "1.0.0",
-  "description": "",
+  "description": " A Node package for real-time shared cursors Resources",
   "main": "dist/server/index.js",
   "type": "module",
   "exports": {
@@ -16,9 +16,9 @@
     "type": "git",
     "url": "git+https://github.com/br0sinski/mirromaus.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["cursor", "shared cursor", "real-time", "websocket", "ws", "typescript"],
+  "author": "br0sinski",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/br0sinski/mirromaus/issues"
   },

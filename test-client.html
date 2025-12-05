@@ -27,7 +27,8 @@
             import { startMirromaus } from  './dist/client/dom.js';
             startMirromaus({
                 url: "ws://localhost:1337",                
-                // trackingElement: document.querySelector('.game'),
+                trackingElement: document.querySelector('.game'),
+                throttleMs: 1000,
             });
         </script>
 
