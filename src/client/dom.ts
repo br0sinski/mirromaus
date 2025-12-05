@@ -27,6 +27,27 @@ export function startMirromaus(options: CursorDomClientOptions): void {
     trackingElement,
   } = options;
 
+
+  if (!isValidElement(container)) {
+    throw new Error('[mirromaus] Invalid container: must be an HTMLElement');
+  }
+
+
+  if (smoothMs < 0) {
+    throw new Error('[mirromaus] Invalid smoothMs: must be >= 0');
+  }
+  if (!Number.isFinite(smoothMs)) {
+    throw new Error('[mirromaus] Invalid smoothMs: must be a finite number');
+  }
+
+  if (trackingElement !== null && trackingElement !== undefined && !isValidElement(trackingElement)) {
+    throw new Error('[mirromaus] Invalid trackingElement: must be an HTMLElement or null');
+  }
+
+  if (createCursorElement && typeof createCursorElement !== 'function') {
+    throw new Error('[mirromaus] Invalid createCursorElement: must be a function');
+  }
+
   const effectivePageId = pageId ?? (typeof window !== "undefined" ? window.location.pathname : undefined);
 
   if(!createCursorElement) {
@@ -152,4 +173,9 @@ function ensureTransformSmoothing(el: HTMLElement, smoothMs: number): void {
   if (!el.style.willChange) {
     el.style.willChange = "transform";
   }
+}
+
+//checks if a value is a valid HTML element
+function isValidElement(element: unknown): element is HTMLElement {
+  return element instanceof HTMLElement;
 }

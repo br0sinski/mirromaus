@@ -4,7 +4,23 @@ import type { CursorClientOptions } from "./types.js";
 // Creates a WebSocket connection to the server and handles sending and receiving cursor messages
 export function createCursorConnection(options: CursorClientOptions): void {
   const { url, userId, pageId, trackingElement, onCursor, onLeave } = options; // Destructure options
-  const throttleMs = options.throttleMs ?? 0; 
+  const throttleMs = options.throttleMs ?? 0;
+
+  // Validate URL
+  if (!url || typeof url !== 'string') {
+    throw new Error('[mirromaus] Invalid URL: url must be a non-empty string');
+  }
+  if (!isValidWebSocketUrl(url)) {
+    throw new Error('[mirromaus] Invalid WebSocket URL: must be ws:// or wss://');
+  }
+
+  // Validate throttleMs
+  if (throttleMs < 0) {
+    throw new Error('[mirromaus] Invalid throttleMs: must be >= 0');
+  }
+  if (!Number.isFinite(throttleMs)) {
+    throw new Error('[mirromaus] Invalid throttleMs: must be a finite number');
+  }
 
   const ws = new WebSocket(url);
 
@@ -79,12 +95,27 @@ export function createCursorConnection(options: CursorClientOptions): void {
     let parsed: unknown;
     try {
       parsed = JSON.parse(event.data);
-    } catch {
+    } catch (error) {
+      console.error('[mirromaus] Failed to parse message:', error);
+      return;
+    }
+
+    if (!parsed || typeof parsed !== 'object') {
+      console.error('[mirromaus] Invalid message format: expected object');
       return;
     }
 
     const msg = parsed as ServerMessage;
+    if (!msg.type) {
+      console.error('[mirromaus] Invalid message: missing type field');
+      return;
+    }
+
     if (msg.type === "init-ack") {
+      if (typeof msg.userId !== 'string') {
+        console.error('[mirromaus] Invalid init-ack message: userId must be string');
+        return;
+      }
       resolvedUserId = msg.userId;
       if (msg.pageId) {
         resolvedPageId = msg.pageId;
@@ -95,7 +126,15 @@ export function createCursorConnection(options: CursorClientOptions): void {
       onLeave?.(msg);
       return;
     }
-    if (msg.type !== "cursor") return;
+    if (msg.type !== "cursor") {
+      console.warn('[mirromaus] Unknown message type:', (msg as any).type);
+      return;
+    }
+
+    if (typeof msg.x !== 'number' || typeof msg.y !== 'number') {
+      console.error('[mirromaus] Invalid cursor message: x and y must be numbers');
+      return;
+    }
 
     onCursor?.(msg);
   };
@@ -108,4 +147,15 @@ export function createCursorConnection(options: CursorClientOptions): void {
   ws.onerror = () => {
     cleanup();
   };
+}
+
+// validates if a string is a valid WebSocket URL
+
+function isValidWebSocketUrl(url: string): boolean {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.protocol === 'ws:' || urlObj.protocol === 'wss:';
+  } catch {
+    return false;
+  }
 }
