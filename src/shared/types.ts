@@ -8,6 +8,8 @@ export interface CursorMessage {
   userId?: string;
   pageId?: string;
   space?: CoordinateSpace;
+  relativeX?: number;
+  relativeY?: number;
 }
 export interface InitMessage {
   type: "init";

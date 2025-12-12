@@ -96,8 +96,14 @@ export function startMirromaus(options: CursorDomClientOptions): void {
       }
       const reference = trackingElement ?? container;
       const rect = reference.getBoundingClientRect();
-      x = rect.left + msg.x;
-      y = rect.top + msg.y;
+      // sends relative coordinates if available, otherwise falls back to absolute within element
+      if (rect.width > 0 && rect.height > 0 && typeof msg.relativeX === "number" && typeof msg.relativeY === "number") {
+        x = rect.left + msg.relativeX * rect.width;
+        y = rect.top + msg.relativeY * rect.height;
+      } else {
+        x = rect.left + msg.x;
+        y = rect.top + msg.y;
+      }
     }
     const translation = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
     el.style.transform = translation;

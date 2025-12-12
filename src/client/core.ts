@@ -62,10 +62,28 @@ export function createCursorConnection(options: CursorClientOptions): void {
 
     let x = event.clientX;
     let y = event.clientY;
+
+
+    // relative x and y coordinates to the tracking element, if applicable
+    let relativeX: number | undefined;
+    let relativeY: number | undefined;
     if (activeTrackingElement) {
       const rect = activeTrackingElement.getBoundingClientRect();
-      x = event.clientX - rect.left;
-      y = event.clientY - rect.top;
+      if (rect.width > 0 && rect.height > 0) {
+        const localX = event.clientX - rect.left;
+        const localY = event.clientY - rect.top;
+        x = localX;
+        y = localY;
+
+
+        // most important part 
+        // calculates the relative coordinates within the element and sends that along
+        // since every user might have different scaling / sizes for the element
+        relativeX = clamp01(localX / rect.width);
+        relativeY = clamp01(localY / rect.height);
+      } else {
+        console.warn("[mirromaus] Tracking element has no size; falling back to viewport coordinates.");
+      }
     }
 
     const message: CursorMessage = {
@@ -75,6 +93,8 @@ export function createCursorConnection(options: CursorClientOptions): void {
       userId: resolvedUserId,
       pageId: resolvedPageId,
       space: coordinateSpace,
+      relativeX,
+      relativeY,
     };
 
     ws.send(JSON.stringify(message));
@@ -158,4 +178,10 @@ function isValidWebSocketUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+// 
+function clamp01(value: number): number {
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
 }
